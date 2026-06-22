@@ -101,7 +101,7 @@ TRANSLATIONS = {
         "en": "📋 Recipe Table"
     },
     "data_recipe_hint": {
-        "zh": "双击单元格编辑，右键可增删行列",
+        "zh": "双击单元格编辑，通过上方按钮增删行列",
         "en": "Double-click to edit, right-click to add/delete rows"
     },
     "data_perf_title": {
@@ -127,6 +127,18 @@ TRANSLATIONS = {
     "data_char_view_detail": {
         "zh": "🔍 查看详情",
         "en": "🔍 View Details"
+    },
+    "data_char_back": {
+        "zh": "返回数据总览",
+        "en": "Back to Data Overview"
+    },
+    "data_char_detail_hint": {
+        "zh": "表征详情视图 — 大图与元数据",
+        "en": "Characterization Detail — Full image & metadata"
+    },
+    "data_char_note_label": {
+        "zh": "备注",
+        "en": "Note"
     },
     "data_highlighted": {
         "zh": "已高亮",
