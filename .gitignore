@@ -1,4 +1,28 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.egg*
+*.egg-info/
+dist/
+build/
+*.so
+
+# Streamlit
+*.streamlit/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
-.streamlit/
+Thumbs.db
+
+# Backup
+*.bak
+
+# Data (user-generated)
+# data/  — keep tracked (logo.png, etc.)
