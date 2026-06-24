@@ -116,7 +116,7 @@ def create_home_page():
             """, unsafe_allow_html=True)
 
 
-# ==================== 数据总览页面（三方联动） ====================
+# ==================== 数据总览页面 ====================
 def create_data_page():
     lang = st.session_state.get("lang", "zh")
 
@@ -135,68 +135,68 @@ def create_data_page():
     st.markdown("<div class='section-header'><span class='section-badge'>01</span>"
                 f"<h3>{t('data_recipe_title', lang)}</h3></div>", unsafe_allow_html=True)
 
-    # 提示
     st.caption(t("data_recipe_hint", lang))
     st.session_state.selected_row = None
 
     recipe_df = st.session_state.recipe_data
 
-    # 行操作 + 列操作 — 紧凑工具栏
+    # 行/列切换按钮
     st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
     tb1, tb2 = st.columns([0.06, 0.06])
     with tb1:
-        active = "true" if st.session_state.get("r_show_row") else "false"
         if st.button("📋 行", key="r_row_toggle", use_container_width=True):
             st.session_state.r_show_row = not st.session_state.r_show_row
             st.rerun()
     with tb2:
-        active = "true" if st.session_state.get("r_show_col") else "false"
         if st.button("📐 列", key="r_col_toggle", use_container_width=True):
             st.session_state.r_show_col = not st.session_state.r_show_col
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # 行操作展开 — 一行内
     if st.session_state.get("r_show_row"):
         with st.container():
-            ca1, ca2, ca3 = st.columns(3)
-            with ca1:
+            ra1, ra2, ra3, ra4 = st.columns([0.15, 0.15, 0.08, 0.08])
+            with ra1:
                 if st.button("⬆ 上方插入行", key="r_ins_top2", use_container_width=True):
                     new_row = pd.DataFrame({c: [""] for c in st.session_state.recipe_data.columns})
                     st.session_state.recipe_data = pd.concat([new_row, st.session_state.recipe_data], ignore_index=True)
                     st.rerun()
-            with ca2:
+            with ra2:
                 if st.button("⬇ 下方插入行", key="r_ins_bot2", use_container_width=True):
                     new_row = pd.DataFrame({c: [""] for c in st.session_state.recipe_data.columns})
                     st.session_state.recipe_data = pd.concat([st.session_state.recipe_data, new_row], ignore_index=True)
                     st.rerun()
-            with ca3:
-                del_r = st.number_input("删除行号", min_value=1, max_value=max(len(st.session_state.recipe_data), 1),
+            with ra3:
+                del_r = st.number_input("", min_value=1, max_value=max(len(st.session_state.recipe_data), 1),
                                          value=1, key="r_del_idx2", label_visibility="collapsed")
-                if st.button(f"🗑 删除第 {int(del_r)} 行", key="r_del_btn2", use_container_width=True):
+            with ra4:
+                if st.button("🗑", key="r_del_btn2", use_container_width=True):
                     ridx = int(del_r) - 1
                     if 0 <= ridx < len(st.session_state.recipe_data):
                         st.session_state.recipe_data = st.session_state.recipe_data.drop(ridx).reset_index(drop=True)
                         st.rerun()
 
+    # 列操作展开 — 一行内
     if st.session_state.get("r_show_col"):
         with st.container():
-            sel_col = st.selectbox("选择列", st.session_state.recipe_data.columns.tolist(),
-                                    key="r_col_sel2", label_visibility="collapsed")
-            col_idx = list(st.session_state.recipe_data.columns).index(sel_col) if sel_col in st.session_state.recipe_data.columns else 0
-            cb1, cb2, cb3, cb4 = st.columns(4)
+            cb0, cb1, cb2, cb3, cb4 = st.columns([0.15, 0.13, 0.13, 0.15, 0.08])
+            with cb0:
+                sel_col = st.selectbox("", st.session_state.recipe_data.columns.tolist(),
+                                        key="r_col_sel2", label_visibility="collapsed")
             with cb1:
                 if st.button("📌 前面插列", key="r_col_b42", use_container_width=True):
-                    cols = st.session_state.recipe_data.columns.tolist()
+                    col_idx = list(st.session_state.recipe_data.columns).index(sel_col) if sel_col in st.session_state.recipe_data.columns else 0
                     st.session_state.recipe_data.insert(col_idx, f"新列_{col_idx}", "")
                     st.rerun()
             with cb2:
                 if st.button("📌 后面插列", key="r_col_af2", use_container_width=True):
-                    cols = st.session_state.recipe_data.columns.tolist()
+                    col_idx = list(st.session_state.recipe_data.columns).index(sel_col) if sel_col in st.session_state.recipe_data.columns else 0
                     st.session_state.recipe_data.insert(col_idx + 1, f"新列_{col_idx+1}", "")
                     st.rerun()
             with cb3:
-                new_nm = st.text_input("重命名", value=sel_col, key="r_col_rn2", label_visibility="collapsed")
-                if st.button("✏ 确定", key="r_col_rnb2", use_container_width=True):
+                new_nm = st.text_input("", value=sel_col, key="r_col_rn2", label_visibility="collapsed")
+                if st.button("✏ 重命名", key="r_col_rnb2", use_container_width=True):
                     if new_nm.strip() and new_nm.strip() != sel_col:
                         st.session_state.recipe_data.rename(columns={sel_col: new_nm.strip()}, inplace=True)
                         st.rerun()
@@ -228,7 +228,6 @@ def create_data_page():
     st.caption(t("data_perf_hint", lang))
 
     perf_df = st.session_state.perf_data
-    # 确保性能表格行数与配方一致（自动扩展/缩减）
     if len(perf_df) != len(st.session_state.recipe_data):
         diff = len(st.session_state.recipe_data) - len(perf_df)
         if diff > 0:
@@ -238,66 +237,67 @@ def create_data_page():
             perf_df = perf_df.iloc[:len(st.session_state.recipe_data)].reset_index(drop=True)
         st.session_state.perf_data = perf_df
 
-    # 行操作 + 列操作 — 紧凑工具栏
+    # 行/列切换按钮
     st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
     tb3, tb4 = st.columns([0.06, 0.06])
     with tb3:
-        active = "true" if st.session_state.get("p_show_row") else "false"
         if st.button("📋 行", key="p_row_toggle", use_container_width=True):
             st.session_state.p_show_row = not st.session_state.p_show_row
             st.rerun()
     with tb4:
-        active = "true" if st.session_state.get("p_show_col") else "false"
         if st.button("📐 列", key="p_col_toggle", use_container_width=True):
             st.session_state.p_show_col = not st.session_state.p_show_col
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # 行操作展开
     if st.session_state.get("p_show_row"):
         with st.container():
-            ca1, ca2, ca3 = st.columns(3)
-            with ca1:
+            pa1, pa2, pa3, pa4 = st.columns([0.15, 0.15, 0.08, 0.08])
+            with pa1:
                 if st.button("⬆ 上方插入行", key="p_ins_top2", use_container_width=True):
                     new_row = pd.DataFrame({c: [""] for c in st.session_state.perf_data.columns})
                     st.session_state.perf_data = pd.concat([new_row, st.session_state.perf_data], ignore_index=True)
                     st.rerun()
-            with ca2:
+            with pa2:
                 if st.button("⬇ 下方插入行", key="p_ins_bot2", use_container_width=True):
                     new_row = pd.DataFrame({c: [""] for c in st.session_state.perf_data.columns})
                     st.session_state.perf_data = pd.concat([st.session_state.perf_data, new_row], ignore_index=True)
                     st.rerun()
-            with ca3:
-                del_p = st.number_input("删除行号", min_value=1, max_value=max(len(st.session_state.perf_data), 1),
+            with pa3:
+                del_p = st.number_input("", min_value=1, max_value=max(len(st.session_state.perf_data), 1),
                                          value=1, key="p_del_idx2", label_visibility="collapsed")
-                if st.button(f"🗑 删除第 {int(del_p)} 行", key="p_del_btn2", use_container_width=True):
+            with pa4:
+                if st.button("🗑", key="p_del_btn2", use_container_width=True):
                     ridx = int(del_p) - 1
                     if 0 <= ridx < len(st.session_state.perf_data):
                         st.session_state.perf_data = st.session_state.perf_data.drop(ridx).reset_index(drop=True)
                         st.rerun()
 
+    # 列操作展开
     if st.session_state.get("p_show_col"):
         with st.container():
-            sel_col = st.selectbox("选择列", st.session_state.perf_data.columns.tolist(),
-                                    key="p_col_sel2", label_visibility="collapsed")
-            col_idx = list(st.session_state.perf_data.columns).index(sel_col) if sel_col in st.session_state.perf_data.columns else 0
-            cb1, cb2, cb3, cb4 = st.columns(4)
-            with cb1:
+            pd0, pd1, pd2, pd3, pd4 = st.columns([0.15, 0.13, 0.13, 0.15, 0.08])
+            with pd0:
+                sel_col = st.selectbox("", st.session_state.perf_data.columns.tolist(),
+                                        key="p_col_sel2", label_visibility="collapsed")
+            with pd1:
                 if st.button("📌 前面插列", key="p_col_b42", use_container_width=True):
-                    cols = st.session_state.perf_data.columns.tolist()
+                    col_idx = list(st.session_state.perf_data.columns).index(sel_col) if sel_col in st.session_state.perf_data.columns else 0
                     st.session_state.perf_data.insert(col_idx, f"新列_{col_idx}", "")
                     st.rerun()
-            with cb2:
+            with pd2:
                 if st.button("📌 后面插列", key="p_col_af2", use_container_width=True):
-                    cols = st.session_state.perf_data.columns.tolist()
+                    col_idx = list(st.session_state.perf_data.columns).index(sel_col) if sel_col in st.session_state.perf_data.columns else 0
                     st.session_state.perf_data.insert(col_idx + 1, f"新列_{col_idx+1}", "")
                     st.rerun()
-            with cb3:
-                new_nm = st.text_input("重命名", value=sel_col, key="p_col_rn2", label_visibility="collapsed")
-                if st.button("✏ 确定", key="p_col_rnb2", use_container_width=True):
+            with pd3:
+                new_nm = st.text_input("", value=sel_col, key="p_col_rn2", label_visibility="collapsed")
+                if st.button("✏ 重命名", key="p_col_rnb2", use_container_width=True):
                     if new_nm.strip() and new_nm.strip() != sel_col:
                         st.session_state.perf_data.rename(columns={sel_col: new_nm.strip()}, inplace=True)
                         st.rerun()
-            with cb4:
+            with pd4:
                 if len(st.session_state.perf_data.columns) > 1:
                     if st.button("🗑 删列", key="p_col_del2", use_container_width=True):
                         st.session_state.perf_data = st.session_state.perf_data.drop(columns=[sel_col])
@@ -319,13 +319,12 @@ def create_data_page():
 
     st.markdown("---")
 
-    # ========== 第三部分：表征图表 ==========
+    # ========== 第三部分：表征表格 ==========
     st.markdown("<div class='section-header'><span class='section-badge'>03</span>"
                 f"<h3>{t('data_char_title', lang)}</h3></div>", unsafe_allow_html=True)
     st.caption(t("data_char_hint", lang))
 
     char_df = st.session_state.char_data
-    # 确保表征表格行数与配方一致
     if len(char_df) != len(st.session_state.recipe_data):
         diff = len(st.session_state.recipe_data) - len(char_df)
         if diff > 0:
@@ -347,9 +346,12 @@ def create_data_page():
         }
     )
     if edited_char is not None:
-            st.session_state.char_data = edited_char
+        st.session_state.char_data = edited_char
 
     st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ==================== NMR 占位 ====================
 def create_nmr_page():
     lang = st.session_state.get("lang", "zh")
     st.markdown(f"<h1 style='font-size:2rem !important;'>{t('nmr_title', lang)}</h1>", unsafe_allow_html=True)
@@ -400,9 +402,7 @@ def create_piass_page():
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # 用按钮跳转
         if st.button(t("piass_go", lang), type="primary", use_container_width=True):
-            # 直接在同标签页导航到 PI_ASS
             js = "window.open('http://localhost:8002', '_blank')"
             st.markdown(f"<script>{js}</script>", unsafe_allow_html=True)
 
