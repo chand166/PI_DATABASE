@@ -117,39 +117,6 @@ def create_home_page():
 
 
 # ==================== 数据总览页面（三方联动） ====================
-def _render_char_detail(lang: str):
-    """表征详情新版面 — 点击表征项后整页跳转到此大图详情视图"""
-    idx = st.session_state.char_detail_idx
-    row = st.session_state.char_data.iloc[idx]
-    # 返回按钮
-    if st.button(f"← {t('data_char_back', lang)}", key="back_char_detail"):
-        st.session_state.show_char_detail = False
-        st.session_state.char_detail_idx = None
-        st.rerun()
-    st.markdown("---")
-    # 详情标题
-    st.markdown(
-        f"<h2 style='font-size:1.6rem;font-weight:800;margin-bottom:8px;'>"
-        f"🖼️ {row.get('样品名称', '')} · {row.get('表征类型', '')}</h2>", unsafe_allow_html=True)
-    st.caption(t("data_char_detail_hint", lang))
-    # 大图
-    img_path = row.get("预览图路径")
-    if pd.notna(img_path) and Path(str(img_path)).exists():
-        st.image(str(img_path), use_container_width=True)
-    else:
-        st.info(t("data_char_no_image", lang))
-    # 元数据卡片
-    note = row.get("备注", "")
-    st.markdown(f"""
-    <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-top:16px;">
-        <p style="color:#64748B;margin:0;"><strong>{t("data_recipe_col_name", lang)}:</strong> {row.get('样品名称', '')}</p>
-        <p style="color:#64748B;margin:8px 0 0 0;"><strong>{t("data_char_col_type", lang)}:</strong> {row.get('表征类型', '')}</p>
-        <p style="color:#64748B;margin:8px 0 0 0;"><strong>Path:</strong> {img_path or 'N/A'}</p>
-        <p style="color:#64748B;margin:8px 0 0 0;"><strong>{t("data_char_note_label", lang)}:</strong> {note or ''}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
 def create_data_page():
     lang = st.session_state.get("lang", "zh")
 
@@ -163,11 +130,6 @@ def create_data_page():
         st.session_state.perf_data = get_sample_perf_data()
     if st.session_state.char_data is None:
         st.session_state.char_data = get_sample_char_data()
-
-    # ========== 表征详情新版面（点击表征项后整页跳转至此） ==========
-    if st.session_state.get("show_char_detail") and st.session_state.char_detail_idx is not None:
-        _render_char_detail(lang)
-        return
 
     # ========== 第一部分：配方表格 ==========
     st.markdown("<div class='section-header'><span class='section-badge'>01</span>"
@@ -349,9 +311,7 @@ def create_data_page():
         hide_index=False,
         num_rows="fixed",
         column_config={
-            col: st.column_config.NumberColumn(col) if any(k in col for k in ["Tg", "Td", "介电", "拉伸", "断裂"])
-            else st.column_config.TextColumn(col)
-            for col in st.session_state.perf_data.columns
+            col: st.column_config.TextColumn(col) for col in st.session_state.perf_data.columns
         }
     )
     if edited_perf is not None:
@@ -373,50 +333,23 @@ def create_data_page():
             char_df = pd.concat([char_df, new_rows], ignore_index=True)
         elif diff < 0:
             char_df = char_df.iloc[:len(st.session_state.recipe_data)].reset_index(drop=True)
-        char_df["预览图路径"] = char_df.get("预览图路径", [None] * len(char_df))
-        char_df["备注"] = char_df.get("备注", [""] * len(char_df))
         st.session_state.char_data = char_df
 
-    # 显示表征 — 按样品名称分组折叠
-    char_df = st.session_state.char_data
-
-    # 联动已删除，所有 expander 默认折叠
-    for sample_name in char_df["样品名称"].unique():
-        group = char_df[char_df["样品名称"] == sample_name]
-        with st.expander(f"📁 {sample_name} ({len(group)} 项表征)", expanded=False):
-            for idx, row in group.iterrows():
-                c1, c2, c3, c4 = st.columns([1, 0.5, 2.5, 1])
-                with c1:
-                    st.markdown(f"<div class='char-card' style='padding:12px;'>"
-                                f"<strong style='color:#0F172A;'>{row.get('表征类型', '')}</strong></div>",
-                                unsafe_allow_html=True)
-                with c2:
-                    img_path = row.get("预览图路径")
-                    if pd.notna(img_path) and Path(str(img_path)).exists():
-                        st.image(img_path, width=120)
-                    else:
-                        st.markdown(f"<div class='char-card' style='padding:16px;'>"
-                                    f"<span style='color:#CBD5E1;font-size:0.85rem;'>{t('data_char_no_image', lang)}</span></div>",
-                                    unsafe_allow_html=True)
-                with c3:
-                    # 可编辑备注字段
-                    note_key = f"char_note_{idx}"
-                    current_note = st.session_state.char_data.at[idx, "备注"] if "备注" in st.session_state.char_data.columns else ""
-                    new_note = st.text_input("备注", value=current_note, key=note_key, label_visibility="collapsed",
-                                              placeholder="添加备注...")
-                    if new_note != current_note:
-                        st.session_state.char_data.at[idx, "备注"] = new_note
-                with c4:
-                    if st.button(f"🔍 详情", key=f"char_detail_{idx}"):
-                        st.session_state.show_char_detail = True
-                        st.session_state.char_detail_idx = idx
-                        st.rerun()
+    st.caption("📝 双击单元格编辑内容")
+    edited_char = st.data_editor(
+        st.session_state.char_data,
+        key="char_editor",
+        use_container_width=True,
+        hide_index=False,
+        num_rows="fixed",
+        column_config={
+            col: st.column_config.TextColumn(col) for col in st.session_state.char_data.columns
+        }
+    )
+    if edited_char is not None:
+            st.session_state.char_data = edited_char
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
-
-
-# ==================== NMR 占位 ====================
 def create_nmr_page():
     lang = st.session_state.get("lang", "zh")
     st.markdown(f"<h1 style='font-size:2rem !important;'>{t('nmr_title', lang)}</h1>", unsafe_allow_html=True)

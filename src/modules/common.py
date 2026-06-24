@@ -41,13 +41,11 @@ def _img_uri(rel_path: str) -> str:
 def init_session_state():
     defaults = {
         "lang": "zh",
-        "page_idx": 0,
-        "show_char_detail": False,
-                "char_detail_idx": None,
+                "page_idx": 0,
                 "selected_row": None,
                 "recipe_data": None,   # 配方表格数据
-        "perf_data": None,     # 性能表格数据
-        "char_data": None,     # 表征数据
+                "perf_data": None,     # 性能表格数据
+                "char_data": None,     # 表征数据
                 "r_show_row": False,
                 "r_show_col": False,
                 "p_show_row": False,
@@ -60,46 +58,16 @@ def init_session_state():
 
 # ==================== 示例数据 ====================
 def get_sample_recipe_data():
-    """生成示例配方数据"""
-    return pd.DataFrame({
-        "样品名称": ["PI-1", "PI-2", "PI-3", "PI-4", "PI-5"],
-        "二酐单体": ["PMDA", "BPDA", "ODPA", "BTDA", "6FDA"],
-        "二胺单体": ["ODA", "MDA", "p-PDA", "ODA", "DDE"],
-        "溶剂": ["DMAC", "NMP", "DMF", "DMAC", "NMP"],
-        "合成方法": ["两步法", "一步法", "两步法", "两步法", "一步法"],
-    })
+    """生成空白配方数据 — 8列"""
+    return pd.DataFrame({f"列{i}": [""] * 5 for i in range(1, 9)})
 
 def get_sample_perf_data():
-    """生成示例性能数据"""
-    return pd.DataFrame({
-        "样品名称": ["PI-1", "PI-2", "PI-3", "PI-4", "PI-5"],
-        "Tg (°C)": [385, 320, 410, 290, 350],
-        "Td (°C)": [560, 520, 580, 500, 540],
-        "介电常数": [3.2, 3.5, 3.0, 3.8, 2.8],
-        "拉伸强度(MPa)": [120, 95, 140, 85, 110],
-        "断裂伸长率(%)": [8, 12, 5, 15, 10],
-    })
+    """生成空白性能数据 — 8列"""
+    return pd.DataFrame({f"列{i}": [""] * 5 for i in range(1, 9)})
 
 def get_sample_char_data():
-    """生成示例表征数据 — 每样品多种表征类型"""
-    return pd.DataFrame({
-        "样品名称": [
-            "PI-1", "PI-1", "PI-1", "PI-1",
-            "PI-2", "PI-2",
-            "PI-3", "PI-3", "PI-3",
-            "PI-4",
-            "PI-5", "PI-5"
-        ],
-        "表征类型": [
-            "FTIR", "TGA", "DSC", "SEM",
-            "FTIR", "XRD",
-            "TGA", "DSC", "XRD",
-            "FTIR",
-            "TGA", "SEM"
-        ],
-        "预览图路径": [None] * 12,
-        "备注": [""] * 12,
-    })
+    """生成空白表征数据 — 8列"""
+    return pd.DataFrame({f"列{i}": [""] * 5 for i in range(1, 9)})
 
 
 def apply_styles():
