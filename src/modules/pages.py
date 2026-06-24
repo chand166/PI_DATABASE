@@ -143,15 +143,15 @@ def create_data_page():
 
     # 行操作 + 列操作 — 紧凑工具栏
     st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
-    tb1, tb2, _ = st.columns([0.1, 0.1, 0.8])
+    tb1, tb2 = st.columns([0.06, 0.06])
     with tb1:
         active = "true" if st.session_state.get("r_show_row") else "false"
-        if st.button("📋 行操作", key="r_row_toggle", use_container_width=True):
+        if st.button("📋 行", key="r_row_toggle", use_container_width=True):
             st.session_state.r_show_row = not st.session_state.r_show_row
             st.rerun()
     with tb2:
         active = "true" if st.session_state.get("r_show_col") else "false"
-        if st.button("📐 列操作", key="r_col_toggle", use_container_width=True):
+        if st.button("📐 列", key="r_col_toggle", use_container_width=True):
             st.session_state.r_show_col = not st.session_state.r_show_col
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
@@ -240,15 +240,15 @@ def create_data_page():
 
     # 行操作 + 列操作 — 紧凑工具栏
     st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
-    tb3, tb4, _ = st.columns([0.1, 0.1, 0.8])
+    tb3, tb4 = st.columns([0.06, 0.06])
     with tb3:
         active = "true" if st.session_state.get("p_show_row") else "false"
-        if st.button("📋 行操作", key="p_row_toggle", use_container_width=True):
+        if st.button("📋 行", key="p_row_toggle", use_container_width=True):
             st.session_state.p_show_row = not st.session_state.p_show_row
             st.rerun()
     with tb4:
         active = "true" if st.session_state.get("p_show_col") else "false"
-        if st.button("📐 列操作", key="p_col_toggle", use_container_width=True):
+        if st.button("📐 列", key="p_col_toggle", use_container_width=True):
             st.session_state.p_show_col = not st.session_state.p_show_col
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)

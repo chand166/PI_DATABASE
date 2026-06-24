@@ -457,10 +457,10 @@ def apply_styles():
 
                 /* 增删行列工具栏按钮 — 紧凑 pill 风格 */
                 .toolbar-btn button {
-                    padding: 2px 10px !important;
-                    min-height: 28px !important;
-                    border-radius: 8px !important;
-                    font-size: 0.8rem !important;
+                                    padding: 0px 8px !important;
+                                    min-height: 24px !important;
+                                    border-radius: 6px !important;
+                                    font-size: 0.75rem !important;
                     font-weight: 500 !important;
                     transition: all 0.2s ease !important;
                     border: 1px solid #E2E8F0 !important;
